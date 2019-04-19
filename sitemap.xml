@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2019/04/19/jupyter/</loc>
+    
+    <lastmod>2019-04-19T09:39:04.205Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2019/04/18/hexo-plugin/</loc>
     
     <lastmod>2019-04-18T13:55:14.686Z</lastmod>
