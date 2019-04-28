@@ -2,11 +2,11 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
   <title>梅辉燿的博客</title>
   
-  
+  <subtitle>Stay Hungry, Stay Foolish</subtitle>
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2019-04-19T09:55:14.437Z</updated>
+  <updated>2019-04-28T08:57:41.914Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -17,13 +17,63 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>CEP系列调研 — 目录</title>
+    <link href="http://yoursite.com/2019/04/28/cep-survey-catalogue/"/>
+    <id>http://yoursite.com/2019/04/28/cep-survey-catalogue/</id>
+    <published>2019-04-28T01:14:03.000Z</published>
+    <updated>2019-04-28T08:57:41.914Z</updated>
+    
+    <content type="html"><![CDATA[<h3 id="Complex-Event-Processing"><a href="#Complex-Event-Processing" class="headerlink" title="Complex Event Processing"></a>Complex Event Processing</h3><p>CEP(Complex Event Processing)是一种根据给定pattern从数据流中识别特定的数据序列的一类技术。本系列文章旨在调研CEP的发展历程，并对最新的CEP系列技术做详细的了解。</p><p>从功能上讲，可以将CEP分为CER(Complex Event Processing)以及Aggregation两个方面。其中，CER主要用于对特定序列的识别，Aggregation主要致力于提取识别序列的统计信息。在早期的系统中，Aggregation往往是基于CER的，但在最新的一些文章中，提出了一些不基于识别的online系统。</p><p>从系统上分，CEP早期主要是单机非并行来处理。而随着大数据时代的到来，数据流逐渐向大规模高速的方向演化，产生了DCEP分支。CEP向分布式处理发展。</p><p>另外，在某些领域，存在着对单个数据流同时进行多个Query的情况。因此，产生了模式share的一些研究来共享多Query识别的资源。</p><h3 id="文章列表"><a href="#文章列表" class="headerlink" title="文章列表"></a>文章列表</h3><p>下面是系列CEP文章目录，以下文章不完全按时间倒序排布：</p><ul><li><p>Complete Event Trend Detection in High-Rate Event Streams<sup>[<a href="https://dl.acm.org/citation.cfm?id=3035947" target="_blank" rel="noopener">1</a>]</sup></p><p>CET(Complete Event Trend)识别主要针对包含单个kleene模式的Query识别进行优化，采用了图模型的方式共享中间序列(partial sequence)存储，降低了存储冗余。同时，采用hybrid的识别方式从图中提取最终结果。</p></li><li><p>On complexity and optimization of expensive queries in complex event processing<sup>[<a href="https://dl.acm.org/citation.cfm?id=2593671" target="_blank" rel="noopener">2</a>]</sup></p><p>  本文是SASE系列的一个升级版，针对复杂Query进行分析找出低效的操作并将这个操作延后进行来提高系统的处理能力。</p></li><li><p>SASE+</p><ul><li>Efficient pattern matching over event streams<sup>[<a href="https://dl.acm.org/citation.cfm?doid=1376616.1376634" target="_blank" rel="noopener">3</a>]</sup></li><li>SASE+: An Agile Language for Kleene Closure overEvent Streams<sup>[<a href="http://avid.cs.umass.edu/sase/uploads/pubs/07-03.pdf" target="_blank" rel="noopener">4</a>]</sup></li></ul><p>SASE+，提出了对Kleene模式的支持，提出了kleene匹配的改进NFA模型。这两篇文章一个是详细介绍了改进的NFA匹配模型。一个详细介绍了SASE+语言，特别是针对Kleene的匹配。</p></li><li><p>High-performance complex event processing over streams<sup>[<a href="https://dl.acm.org/citation.cfm?doid=1142473.1142520" target="_blank" rel="noopener">5</a>]</sup></p><p>SASE，提出了SASE语言来进行CEP，提出了NFA模型。</p></li><li><p>TelegraphCQ: Continuous Dataflow Processing for an Uncertain World<sup>[<a href="http://www-db.cs.wisc.edu/cidr/cidr2003/program/p24.pdf" target="_blank" rel="noopener">6</a>]</sup></p><p>加州大学伯克利分校推出的一个系统，主要解决的问题是:</p><ul><li>在数据流中做query而不是数据库</li><li>持续query: window,slide</li><li>query之间的share以提高系统效率</li></ul></li><li><p>Efficient Filtering of Composite Events<sup>[<a href="https://link.springer.com/chapter/10.1007%2F3-540-45073-4_17" target="_blank" rel="noopener">7</a>]</sup></p><p>  在ENS(Event Notification Services)系统中，识别与(同时发生)、或(至少一个发生)、非(一段时间不发生)以及简单序列</p></li><li><p>Temporal Management of RFID Data<sup>[<a href="http://www.vldb.org/archives/website/2005/program/paper/wed/p1128-wang.pdf" target="_blank" rel="noopener">8</a>]</sup></p><p>  一个RFID中间件，主要是基于关系型数据库来做的，将query转化为对应的数据库操作。</p></li></ul><hr><ul><li><p>Cayuga</p><ul><li>Cayuga: A General Purpose Event Monitoring System<sup>[[9][]]</sup></li><li>Towards Expressive Publish/Subscribe Systems<sup>[[10][]]</sup></li></ul><p>这两篇文章介绍了Cayuga，9主要针对Cayuga系统的设计及实现，10介绍了基于Cayuga的Pub/Sub系统</p></li></ul>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h3 id=&quot;Complex-Event-Processing&quot;&gt;&lt;a href=&quot;#Complex-Event-Processing&quot; class=&quot;headerlink&quot; title=&quot;Complex Event Processing&quot;&gt;&lt;/a&gt;Complex Event 
+      
+    
+    </summary>
+    
+      <category term="CEP" scheme="http://yoursite.com/categories/CEP/"/>
+    
+    
+      <category term="CEP" scheme="http://yoursite.com/tags/CEP/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Hexo开发 — apollo主题Tag开发</title>
+    <link href="http://yoursite.com/2019/04/26/apollo-theme-edit/"/>
+    <id>http://yoursite.com/2019/04/26/apollo-theme-edit/</id>
+    <published>2019-04-26T12:32:44.000Z</published>
+    <updated>2019-04-28T00:31:22.272Z</updated>
+    
+    <content type="html"><![CDATA[<p><a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank" rel="noopener">apollo</a>是一个简洁美观的主题，该主题已不再更新。实际使用过程中发现该主题缺少对标签和分类的支持，因此fork了一下这个项目，准备自己开发标签和分类页面支持。</p><h1 id="Hexo主题开发"><a href="#Hexo主题开发" class="headerlink" title="Hexo主题开发"></a>Hexo主题开发</h1><p>Hexo的主题创建时非常简单的，只需要在theme文件夹内创建一个新的文件夹，文件夹的内容一般至少包含这几个文件或文件夹</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">├── _config.yml      //主题的配置文件</span><br><span class="line">├── languages//语言文件夹</span><br><span class="line">├── layout//页面模板文件夹</span><br><span class="line">├── scripts//脚本文件夹</span><br><span class="line">└── source//资源文件夹</span><br></pre></td></tr></table></figure><h4 id="config-yml"><a href="#config-yml" class="headerlink" title="_config.yml"></a>_config.yml</h4><p>配置文件，所有配置会存储在全局变量theme中</p><h4 id="languages"><a href="#languages" class="headerlink" title="languages"></a>languages</h4><p>定义国际化相关的语言文件夹</p><h4 id="layout"><a href="#layout" class="headerlink" title="layout"></a>layout</h4><p>布局文件夹，页面的主题模板在这里定义。默认支持swig模板引擎，可以通过插件支持EJS、Hami或者Jade支持</p><h4 id="scripts"><a href="#scripts" class="headerlink" title="scripts"></a>scripts</h4><p>脚本文件夹。定义用于页面的插件，如果该插件不需要发布到npm上，可以直接在scripts文件夹中定义</p><h4 id="source"><a href="#source" class="headerlink" title="source"></a>source</h4><p>资源文件夹，除了模板以外的 Asset，例如 CSS、JavaScript 文件等，都应该放在这个文件夹中。文件或文件夹开头名称为 <code>_</code>（下划线线）或隐藏的文件会被忽略。</p><p>如果文件可以被渲染的话，会经过解析然后储存到 <code>public</code> 文件夹，否则会直接拷贝到 <code>public</code> 文件夹。</p><h1 id="apollo标签支持"><a href="#apollo标签支持" class="headerlink" title="apollo标签支持"></a>apollo标签支持</h1><p>根据上面的介绍可以发现如果需要增加页面模板，需要在layout文件夹内编写模板文件，然后将新的页面的layout定义为该模板。</p><p>查看apollo的layout文件目录</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">layout</span><br><span class="line">├── archive.jade</span><br><span class="line">├── index.jade</span><br><span class="line">├── mixins</span><br><span class="line">│   ├── paginator.jade</span><br><span class="line">│   └── post.jade</span><br><span class="line">├── partial</span><br><span class="line">│   ├── comment.jade</span><br><span class="line">│   ├── copyright.jade</span><br><span class="line">│   ├── head.jade</span><br><span class="line">│   ├── layout.jade</span><br><span class="line">│   ├── nav.jade</span><br><span class="line">│   └── scripts.jade</span><br><span class="line">└── post.jade</span><br></pre></td></tr></table></figure><p>可以发现这里使用了jade模板引擎，jade的语法较为简单，参考<a href="http://jade-lang.com/" target="_blank" rel="noopener">jade官网</a>文档基本可以完成简单的网页模板设计。</p><p>我们可以发现这里确实tag页面和category页面的模板。新建<code>tag.jade</code>和<code>category.jade</code>文件。为了在博客列表已经博客页面共用tag的模板，在mixins文件夹下创建<code>tags.jade</code>文件夹。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;&lt;a href=&quot;https://github.com/pinggod/hexo-theme-apollo&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;apollo&lt;/a&gt;是一个简洁美观的主题，该主题已不再更新。实际使用过程中发现该主题缺少对标签和分类的
+      
+    
+    </summary>
+    
+    
+      <category term="Hexo" scheme="http://yoursite.com/tags/Hexo/"/>
+    
+      <category term="apollo" scheme="http://yoursite.com/tags/apollo/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Jupyter常用配置</title>
     <link href="http://yoursite.com/2019/04/19/jupyter/"/>
     <id>http://yoursite.com/2019/04/19/jupyter/</id>
     <published>2019-04-19T09:07:18.000Z</published>
-    <updated>2019-04-19T09:55:14.437Z</updated>
+    <updated>2019-04-23T07:19:56.148Z</updated>
     
-    <content type="html"><![CDATA[<p>主要记录一下Jupyter notebook的一些配置，方便以后查阅。</p><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pip install jupyter</span><br></pre></td></tr></table></figure><h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><h4 id="生成配置文件"><a href="#生成配置文件" class="headerlink" title="生成配置文件"></a>生成配置文件</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ jupyter notebook --generate-config</span><br></pre></td></tr></table></figure><h4 id="设置密码"><a href="#设置密码" class="headerlink" title="设置密码"></a>设置密码</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ jupyter notebook password</span><br><span class="line">Enter password:</span><br><span class="line">Verify password:</span><br></pre></td></tr></table></figure><p>如果这里显示</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FileNotFoundError: [Errno 2] No such file or directory: <span class="string">'home/xxx/.jupyter/jupyter_notebook_config.json'</span></span><br></pre></td></tr></table></figure><p>手动在根目录新建文件夹</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir ~/.jupyter</span><br></pre></td></tr></table></figure><p>在默认配置文件~/.jupyter/jupyter_nodebook_config.py中输入</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">c.NotebookApp.password = <span class="string">'sha1:...'</span></span><br></pre></td></tr></table></figure><p>密文为刚刚生成的密文，在jupyter_notebook_config.json中</p><h4 id="远端访问"><a href="#远端访问" class="headerlink" title="远端访问"></a>远端访问</h4><p>  打开默认配置文件~/.jupyter/jupyter_nodebook_config.py</p>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">c.NotebookApp.ip = &apos;0.0.0.0&apos; // 所有ip均可访问,注意网上说这里可以用*，但是我实测发现*会报错</span><br><span class="line">c.NotebookApp.open_browser = False //禁止自动打开文件夹</span><br><span class="line">c.NotebookApp.port = 15000</span><br></pre></td></tr></table></figure><h4 id="使用matplotlib"><a href="#使用matplotlib" class="headerlink" title="使用matplotlib"></a>使用matplotlib</h4>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">import matplotlib.pyplot as plt</span><br><span class="line">%matplotlib inline</span><br></pre></td></tr></table></figure><h4 id="自动补全"><a href="#自动补全" class="headerlink" title="自动补全"></a>自动补全</h4><p>使用jupyter_contrib_nbextensions</p>  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ pip install jupyter_contrib_nbextensions</span><br><span class="line">$ jupyter contrib nbextension install --user</span><br><span class="line">$ pip install jupyter_nbextensions_configurator</span><br><span class="line">$ jupyter nbextensions_configurator <span class="built_in">enable</span> --user</span><br></pre></td></tr></table></figure><p>然后重启jupyter，在出现的Nbextensions菜单下勾选Hinterland插件</p><p>不定时更新。。。</p>]]></content>
+    <content type="html"><![CDATA[<p>主要记录一下Jupyter notebook的一些配置，方便以后查阅。</p><h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ pip install jupyter</span><br></pre></td></tr></table></figure><h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><h4 id="生成配置文件"><a href="#生成配置文件" class="headerlink" title="生成配置文件"></a>生成配置文件</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ jupyter notebook --generate-config</span><br></pre></td></tr></table></figure><h4 id="设置密码"><a href="#设置密码" class="headerlink" title="设置密码"></a>设置密码</h4><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ jupyter notebook password</span><br><span class="line">Enter password:</span><br><span class="line">Verify password:</span><br></pre></td></tr></table></figure><p>如果这里显示</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">FileNotFoundError: [Errno 2] No such file or directory: <span class="string">'home/xxx/.jupyter/jupyter_notebook_config.json'</span></span><br></pre></td></tr></table></figure><p>手动在根目录新建文件夹</p><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ mkdir ~/.jupyter</span><br></pre></td></tr></table></figure><p>在默认配置文件~/.jupyter/jupyter_nodebook_config.py中输入</p><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">c.NotebookApp.password = <span class="string">'sha1:...'</span></span><br></pre></td></tr></table></figure><p>密文为刚刚生成的密文，在jupyter_notebook_config.json中</p><h4 id="远端访问"><a href="#远端访问" class="headerlink" title="远端访问"></a>远端访问</h4><p>  打开默认配置文件~/.jupyter/jupyter_nodebook_config.py</p>  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">c.NotebookApp.ip = <span class="string">'0.0.0.0'</span> // 所有ip均可访问,注意网上说这里可以用*，但是我实测发现*会报错</span><br><span class="line">c.NotebookApp.open_browser = <span class="literal">False</span> //禁止自动打开文件夹</span><br><span class="line">c.NotebookApp.port = <span class="number">15000</span></span><br></pre></td></tr></table></figure><h4 id="使用matplotlib"><a href="#使用matplotlib" class="headerlink" title="使用matplotlib"></a>使用matplotlib</h4>  <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line">%matplotlib inline</span><br></pre></td></tr></table></figure><h4 id="自动补全"><a href="#自动补全" class="headerlink" title="自动补全"></a>自动补全</h4><p>使用jupyter_contrib_nbextensions</p>  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ pip install jupyter_contrib_nbextensions</span><br><span class="line">$ jupyter contrib nbextension install --user</span><br><span class="line">$ pip install jupyter_nbextensions_configurator</span><br><span class="line">$ jupyter nbextensions_configurator <span class="built_in">enable</span> --user</span><br></pre></td></tr></table></figure><p>然后重启jupyter，在出现的Nbextensions菜单下勾选Hinterland插件</p><p>不定时更新。。。</p>]]></content>
     
     <summary type="html">
     
@@ -36,6 +86,8 @@
     </summary>
     
     
+      <category term="Jupyter" scheme="http://yoursite.com/tags/Jupyter/"/>
+    
   </entry>
   
   <entry>
@@ -43,7 +95,7 @@
     <link href="http://yoursite.com/2019/04/18/hexo-plugin/"/>
     <id>http://yoursite.com/2019/04/18/hexo-plugin/</id>
     <published>2019-04-18T13:21:40.000Z</published>
-    <updated>2019-04-18T13:55:14.686Z</updated>
+    <updated>2019-04-26T12:36:51.313Z</updated>
     
     <content type="html"><![CDATA[<p>一直想写博客，但是个人比较懒，今天终于下定决心用hexo搭了一个博客网站。选hexo的主要原因是我喜欢用markdown，然后我的服务器也差不多到期了，用hexo可以挂在github上比较方便。</p><h4 id="搭建"><a href="#搭建" class="headerlink" title="搭建"></a>搭建</h4><p>基于hexo搭建博客网站比较简单。这里主要参考了<a href="https://www.cnblogs.com/liuxianan/p/build-blog-website-by-hexo-github.html" target="_blank" rel="noopener">使用hexo+github搭建免费个人博客详细教程</a>。文章写得很详细，我这里就不多说了。主要说下遇到的几个问题。</p><h4 id="github-pages配置"><a href="#github-pages配置" class="headerlink" title="github pages配置"></a>github pages配置</h4><p>首先碰到的问题是搭建完成后访问我的github page出现404错误。这里主要的问题是GitHub仓库名出错了，必须是&lt;github用户名&gt;.github.io。改名后就可以正常访问了。</p><p>在解决这个问题过程中还发现了github仓库setttings下面有一个github pages配置，可以切换显示的branch和主题。</p><h4 id="图标问题"><a href="#图标问题" class="headerlink" title="图标问题"></a>图标问题</h4><p>我是用的主题是<a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank" rel="noopener">apollo</a>，这个主题比较清爽。不过搭建之后发现它有一个很丑的默认图标，这个肯定是不能忍的了。由于hexo以及这个主题文档都没有提及图标修改，所以搞了半天。</p><p>最开始的办法是找到这个主题的文件夹theme/apollo，发现它的source目录下有一个favicon.png和默认图标是一样的，于是我就将我的图标复制替换了这个默认图标，果然页面的图标修改成功了。不过一直感觉这样做肯定不是一个正确的做法，毕竟这样设计太合理了。所以就去看了一下这个主题的源码，我在theme/apollo/layout文件夹下发现了一堆jade结尾的文件，这些都是jade模板引擎的文件。不过我都看不懂|(*′口`)。不过大概看了一下，发现有几个文件里面写着</p><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">link(rel=&quot;icon&quot;, href=url_for(theme.favicon))</span><br></pre></td></tr></table></figure><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">a.logo-link(href=url_for())</span><br><span class="line">  img(src=url_for(theme.logo) alt=&quot;logo&quot;)</span><br></pre></td></tr></table></figure><p>大致猜了一下这里就是指向图标的位置。这里发现了一个theme变量，于是去查文档(不得不说hexo的文档真的不是初学者看得懂的)，只看到了一个theme变量的介绍是继承自网站配置，但是根目录下的_config.yml文件中的theme明显不可能包含变量，但是完全不知道在哪定义的。直到我偶然发现主题文件夹下面有一个_config.yml的文件，里面有一个</p><figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">favicon:</span> <span class="string">favicon.png</span></span><br><span class="line"><span class="attr">logo:</span> <span class="string">favicon.png</span></span><br></pre></td></tr></table></figure><p>所以很明显，定义的位置在这里。改为自定义的路径即可。</p><p>hexo整体的搭建还是挺简单的，网上教程也比较多，但是官方文档是真的难看懂。另外一个问题是github访问好慢。。。后面准备把图片之类的上传到七牛云上去了，准备写一个插件打包的时候自动上传并修改url。</p>]]></content>
     
@@ -58,6 +110,10 @@
     </summary>
     
     
+      <category term="Hexo" scheme="http://yoursite.com/tags/Hexo/"/>
+    
+      <category term="博客" scheme="http://yoursite.com/tags/%E5%8D%9A%E5%AE%A2/"/>
+    
   </entry>
   
   <entry>
@@ -65,33 +121,14 @@
     <link href="http://yoursite.com/2019/04/18/SASE/"/>
     <id>http://yoursite.com/2019/04/18/SASE/</id>
     <published>2019-04-18T09:30:27.000Z</published>
-    <updated>2019-04-18T11:35:18.479Z</updated>
+    <updated>2019-04-20T04:31:37.153Z</updated>
     
     <summary type="html">
     
     </summary>
     
     
-  </entry>
-  
-  <entry>
-    <title>Hello World</title>
-    <link href="http://yoursite.com/2019/04/18/hello-world/"/>
-    <id>http://yoursite.com/2019/04/18/hello-world/</id>
-    <published>2019-04-18T07:34:25.858Z</published>
-    <updated>2019-04-18T07:34:25.859Z</updated>
-    
-    <content type="html"><![CDATA[<p>Welcome to <a href="https://hexo.io/" target="_blank" rel="noopener">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="noopener">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="noopener">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="noopener">GitHub</a>.</p><h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">"My New Post"</span></span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="noopener">Writing</a></p><h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo server</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="noopener">Server</a></p><h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo generate</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="noopener">Generating</a></p><h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo deploy</span><br></pre></td></tr></table></figure><p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="noopener">Deployment</a></p>]]></content>
-    
-    <summary type="html">
-    
-      
-      
-        &lt;p&gt;Welcome to &lt;a href=&quot;https://hexo.io/&quot; target=&quot;_blank&quot; rel=&quot;noopener&quot;&gt;Hexo&lt;/a&gt;! This is your very first post. Check &lt;a href=&quot;https://hexo.
-      
-    
-    </summary>
-    
+      <category term="CEP" scheme="http://yoursite.com/tags/CEP/"/>
     
   </entry>
   
