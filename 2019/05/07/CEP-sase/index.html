@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="zh-cn"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> CEP系统 - SASE · 梅辉燿的博客</title><meta name="description" content="CEP系统 - SASE - 梅辉燿"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/images/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://yoursite.com/atom.xml" title="梅辉燿的博客"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/images/favicon.png" alt="logo"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">博客</a></li><li class="nav-list-item"><a href="/tags" target="_self" class="nav-list-link">标签</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">档案</a></li><li class="nav-list-item"><a href="/categories" target="_self" class="nav-list-link">分类</a></li><li class="nav-list-item"><a href="https://github.com/MUYOUHUIYAO" target="_blank" class="nav-list-link">GITHUB</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">CEP系统 - SASE</h1><div class="post-info">2019年5月7日</div><div class="post-content"><p>SASE系列的第一篇，提出了SASE语言以及NFA模型。</p>
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>传感器(RFID等)的大量部署催生了一大批跟踪监控的应用，如供应链管理、超市盗窃监控、医疗和环境监控等等。同时，大量部署的传感器会实时产生大量的事件需要进行过滤、复杂模式检测以及复杂事件生成等操作。</p>
+<p>为了便于说明，这里举一个超市盗窃的例子，即顾客从货架上取到货物并且未结账。为了识别这个复杂事件，要求系统支持:</p>
+<ul>
+<li>事件的存在和不存在(即否语义)的检测。</li>
+<li>时间约束例如时序、滑动窗口等</li>
+<li>属性约束</li>
+</ul>
+<p>而现有的系统如sub/pub系统主要致力于单个事件的过滤。流处理系统无法处理否语义。现有的复杂事件识别无法处理滑动窗口以及属性约束等等。因此，提出了SASE语言，并设计CEP系统，主要设计目标是：</p>
+<ul>
+<li>大规模流数据支持: 能处理每秒上千的事件</li>
+<li>能够持续地从大的时间窗口中提取复杂事件</li>
+</ul>
+<h3 id="SASE语言"><a href="#SASE语言" class="headerlink" title="SASE语言"></a>SASE语言</h3><p>首先是<b>事件模型</b>：系统的输入是一个无限的事件序列，称为事件流。其中，每个事件都会在某个时间点瞬时且原子性地发生(即发生或不发生)，每个事件都有一个事件类型以及对应的一系列属性，且每个事件都被赋予一个时间戳。</p>
+<p>然后是<b>模式语言</b>。SASE语言都具有如下形式：</p>
+
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+</script>
+$$
+\begin{align}
+& EVENT &lt;Event\ Pattern&gt; \\
+& [WHERE &lt;qualification&gt;] \\
+& [WITHIN &lt;Window&gt;]
+\end{align}
+$$
+
+<p>下面介绍一下它的操作符：</p>
+<ul>
+<li><strong>ANY</strong>：eg  $Any(A_1, A_2, … ,A_n) $，其中 $A_1、A_2、…、A_n$表示事件类型，该操作符识别其中任何一种类型的事件发生。</li>
+<li><strong>SEQ_</strong>: eg $SEQ(A_1, A_2, …, A_n) $，在不存在negation语义的情况下，<strong>SEQ</strong>被转化为<strong>SEQ_</strong>操作符，<strong>SEQ_</strong>接收一系列事件类型，这些事件类型的先后顺序决定识别的对应事件发生的顺序。即<strong>SEQ_</strong>操作符识别一系列先后发生的事件序列。另外，<strong>SEQ_</strong>操作符可以以<strong>ANY</strong>操作符作为输入</li>
+<li><strong>SEQ_WITHOUT</strong>: eg $SEQ(A_1, A_2, …, A_{i-1},  !A_i, A_{i+1}, …, A_n)$，在存在negation语义的情况下，<strong>SEQ</strong>被转化为<strong>SEQ_WITHOUT</strong>操作符，表示在先后发生的$A_1、A_2、…、A_{i-1}$以及$ A_{i+1}, …, A_n$类型事件之间，不发生$A_i$类型的事件。<strong>SEQ_WITHOUT</strong>操作符存在两种特例，一是如$SEQ(!A_1, A_2)$的以否开始的序列，一种是如$SEQ(A_1, !A_2)$的以否结束的序列，这两种序列只能和<strong>WITHIN</strong>语句结合起来使用。</li>
+<li><strong>Selection</strong>：作用与<strong>WHERE</strong>语句的操作符，是一系列由<strong>$\land$(与)</strong>和<strong>$\lor$(或)</strong>连接起来的简单的参数化的<strong>predicates</strong>。用于筛选事件。</li>
+<li><strong>WITHIN_</strong>：由<strong>WITHIN</strong>语句翻译而来，定义了<strong>SEQ</strong>语句中事件序列的最大时间跨度。</li>
+</ul>
+<h3 id="几点限制"><a href="#几点限制" class="headerlink" title="几点限制"></a>几点限制</h3><ul>
+<li>只支持原始类型的事件到复杂类型的事件之间的转化，不支持复杂类型事件到复杂类型事件之间的转化</li>
+<li>不能处理乱序</li>
+<li>对Aggregation支持有限</li>
+</ul>
+<h3 id="基本识别模型"><a href="#基本识别模型" class="headerlink" title="基本识别模型"></a>基本识别模型</h3><p>以Query：</p>
+
+$$
+\begin{align}
+& EVENT\  SEQ(A\ x_1,B\ x_2,!C\ x_3 ,D\ x_4) \\
+& WHERE\  [attr1, attr2] \land x1.attr3 = ‘1’ \land x1.attr4 < x4.attr4 \\
+& WITHIN\  T
+\end{align}
+$$
+
+<p>为例，SASE的基本识别模型如图所示<br><img src="/images/sase_basic_query_plan_model.jpg" alt="基本识别模型" style="width:75%"></p>
+<p>共分为五个部分：</p>
+<ul>
+<li><p><strong>Sequence scan and construction(SSC)</strong>： 序列扫描和构造，SSC处理query中的存在(positive)语义组成的序列，得到子序列(例中SEQ(A, B, D))，然后扫描输入流并得到序列。这个过程是基于NFA来实现的。对应子序列SEQ(A, B, D)，其NFA模型如下图所示。其中0、1、2、3表示状态，0为起始状态，3为终止状态。状态之间的边表示状态迁移的条件。我们可以注意到其中每个状态还存在指向自身的*边，这条边可以和向前边同时执行，以跳过不匹配的事件以及在事件匹配时保留当前序列的状态。同时，使用一个执行栈来记录运行过程中活跃的状态，状态变化在栈中使用前向指针来表示。最终使用DFS算法从每个终止状态出发遍历所有到达起始状态的且不存在相邻的相同状态的路径即可得到匹配序列。</p>
+<p><img src="/images/sase_basic_nfa.jpg" alt="nfa模型及执行栈" style="width:75%"></p>
+</li>
+<li><p><strong>Selection($\sigma$)</strong>：根据<strong>WHERE</strong>语句条件对SSC提交的序列进行过滤</p>
+</li>
+<li><p><strong>Window(WD)</strong>：根据<strong>WITHIN</strong>语句定义的窗口来过滤序列</p>
+</li>
+<li><p><strong>Negation(NG)</strong>：处理<strong>negation</strong>语义，过滤序列。这里使用了一种叫<em>partitioned indexing</em>的技术，具体而言，就是将事件流按照固定的时间片段划分。</p>
+</li>
+<li><p><strong>Transformation(TF)</strong>：将最终得到的序列转化为复杂事件</p>
+</li>
+</ul>
+<p>这五个组件按照pipeline的方式组织起来，来快速得到匹配序列。</p>
+<h3 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h3><p>上面提出了SASE的基本执行模型，但是这个模型存在一个问题：在大窗口的情况下，产生的中间结果过大导致系统负载过高，影响query性能。因此提出了几点优化</p>
+<h4 id="SSC优化"><a href="#SSC优化" class="headerlink" title="SSC优化"></a>SSC优化</h4><p>在原有SSC模型的基础上，提出了<strong>Active Instance Stack (AIS)</strong>来代替基础模型中的执行栈，每个NFA的状态都存在一个AIS，在SS过程中，AIS存储每一个使状态变迁到其对应状态的事件以及前置栈中的最近事件(<em>most recent instance in the previous stack</em>, RIP)。如图所示，在状态2对应的AIS中，存储了两个使状态变迁到状态2的事件即$b_3$和$b_6$，其中在状态1的AIS中发生在$b_6$之前的最近事件是$a_4$，因此$a_4$即是对应$b_6$的RIP。图中用两条虚拟边显示了$b_6$的前置事件。在SC阶段，通过一个BFS算法从终止状态的AIS栈回溯到起始状态，即可得到所有的序列。</p>
+<p><img src="/images/sase_optimize_ssc.jpg" alt="SSC优化" style="width:75%"></p>
+<h4 id="Selection优化"><a href="#Selection优化" class="headerlink" title="Selection优化"></a>Selection优化</h4><p>前面的优化只是优化了SSC的效率，并未减少无效的中间结果。在Selection优化的阶段，通过将简单的predicates提前到SSC阶段执行来对SSC执行进行剪枝。</p>
+<p><strong>单属性相等</strong>：即在SEQ中的每个事件类型都存在的一个相同属性的属性值保持不变，eg 相同的RFID标签、相同的病人编号等等。对于这种predicate，最简单的方法是按照该属性将事件流划分为很多不同的小流，但是这种方法对不相关的事件也会进行partition，存在浪费。因此提出了<strong><em>Partitioned Active Instance Stack</em></strong> (<strong><em>PAIS</em></strong>): 在SC过程中来进行划分并产生对应的一系列AIS。这样事件划分即被推迟到query之后，避免了性能损失。<br><img src="/images/sase_optimize_sel_pais.jpg" alt="PAIS" style=";width:75%"></p>
+<p><strong>多属性相等</strong>：类似于单属性相等，但是有多个属性。简单的方法是对每个属性元组都进行划分。但是当划分过多时容易造成内存瓶颈。因此这里提出了两个优化方案：</p>
+<ul>
+<li>Multi-PAIS：对每个属性都应用PAIS，然后取所有PAIS的结果的交集。</li>
+<li>Dynamic Filtering: 只对单属性应用PAIS，对其它属性，在SC阶段进行过滤。</li>
+</ul>
+<p><img src="/images/sase_optimize_sel_multi_pais.jpg" alt="multi-PAIS" style="width:75%"></p>
+<h4 id="Window优化"><a href="#Window优化" class="headerlink" title="Window优化"></a>Window优化</h4><p>与predicate类似，将Window判断提前到SSC过程中。</p>
+<p><img src="/images/sase_optimize_query_plan_model.jpg" alt="优化识别模型" style="width:75%"></p>
+</div></article></div></main><footer><div class="paginator"><a href="/2019/05/10/CEP-SASE-plus/" class="prev">上一篇</a><a href="/2019/05/07/CEP-cayuga/" class="next">下一篇</a></div><div class="copyright"><p>© 2019 <a href="http://yoursite.com">梅辉燿</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script></body></html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="zh-cn"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> CEP系统 — Cayuga · 梅辉燿的博客</title><meta name="description" content="CEP系统 — Cayuga - 梅辉燿"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/images/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://yoursite.com/atom.xml" title="梅辉燿的博客"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/images/favicon.png" alt="logo"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">博客</a></li><li class="nav-list-item"><a href="/tags" target="_self" class="nav-list-link">标签</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">档案</a></li><li class="nav-list-item"><a href="/categories" target="_self" class="nav-list-link">分类</a></li><li class="nav-list-item"><a href="https://github.com/MUYOUHUIYAO" target="_blank" class="nav-list-link">GITHUB</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">CEP系统 — Cayuga</h1><div class="post-info">2019年5月7日</div><div class="post-content"><p>Cayuga是CEP系列早期的一个有影响力的系统，来源于pub/sub系统。它主要为了解决两个问题：</p>
+<ul>
+<li>支持复杂的query，例如否语义。</li>
+<li>并发query。</li>
+</ul>
+<p>Cayuga设计了自己的query语言<strong>Cayuga Event Language(CEL)</strong>，以支持优化。同样使用了自动机模型。下面分三个部分介绍Cayuga：CEL、自动机模型以及系统架构。</p>
+<h3 id="CEL语言"><a href="#CEL语言" class="headerlink" title="CEL语言"></a>CEL语言</h3><p>首先是数据模型，Cayuga中数据模型参照了数据库模型。</p>
+<p><strong>Event</strong>：在Cayuga中，事件被认为是一个关联元组(relational tuple)，且包含一个起始时间$t_0$和结束时间$t_1$。</p>
+<p><strong>Event Stream</strong>:  和数据库不同，在CEP中，事件流是一个按时间顺序排列的事件序列，每个事件流都包含一个固定的关联模式(relational schema)。事件在事件流中按结束时间$t_1$排列，这个时间也称为<strong>检测时间(detection time)</strong>。检测时间相同的事件被认为同时发生。</p>
+<p>然后是CEL语言，这里以股票应用为例。首先定义了一个股票事件模型：$Stock(Name, Price, Volume)$。 每个CEL Query都具有以下形式：<br>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML">
+</script>
+$$
+\begin{align}
+& SELECT\ &lt;attributes&gt; \\
+& FROM\ &lt;stream expression&gt; \\
+& PUBLISH\ &lt;output stream&gt;
+\end{align}
+$$
+</p>
+<p>这里的SELECT语句和SQL中的SELECT非常类似，都指定的输出模式中的属性名或聚合操作，并可以使用<strong>AS</strong>关键字来重命名。SELECT语句可以省略，若省略则相当于SELECT *。PUBLISH语句指定的输出流的名字，以便其它QUERY可以它为输入。最简单的QUERY如：<br>
+$$
+\begin{align}
+& SELECT\ * \\
+& FROM\ Stock \\
+& PUBLISH\ MyStock
+\end{align}
+$$
+<br>FROM语句定义了流表达式，这是整个Query的核心。一个流表达式表明了数据的来源，并且支持了一元构造器FILTER和二元构造器NEXT和FOLD，并且支持在FROM语句中嵌套其它QUERY。下面分别介绍这些构造器。</p>
+<p><strong>FILTER</strong>: 顾名思义，$FILTER{ predExpr }(stream)$是对输入流进行过滤的构造器。下面的例子定义了一个简单的Query从股票流中过滤出IBM的价格大于83的数据形成新的流。另外，在FILTER构造器中事件有一个特殊的属性DUR，实际上DUR指的是事件发生的时间间隔$t_1-t_0$。<br>
+$$
+\begin{align}
+& SELECT\ Price\ AS\ IBMPrice \\
+& FROM\ FILTER\{name='IBM'\ and\ Price > 83\}(stock) \\
+& PUBLISH\ IBMStock
+\end{align}
+$$
+<br><strong>NEXT</strong>: $S_1\ NEXT{predExpr}(S_2)$，其中$S_1$和$S_2$是两条流。NEXT构造器输入一个事件对($e_1, e_2$)的流，其中$e_1$来自流$S_1$，$e_2$是$e_1$发生后$S_2$中发生的下一个满足predExpr的事件。下面是一个例子，用来提取价格大于83的IBM股票价格以及之后的Microsoft股票的价格:<br>
+$$
+\begin{align}
+& SELECT\ IBMPrice,\ Price\ AS\ MSFTPrice \\
+& FROM\ IBMStock\ NEXT\{Name='MSFT'\}(Stock) 
+\end{align}
+$$
+<br>另外，当NEXT的两个输入流中含有相同的属性时，为了避免冲突，使用$\$1.foo$表示左流的属性，$\$2.foo$表示右流的属性。</p>
+<p><strong>FOLD</strong>: $S_1\ FOLD{predExpr_1, predExpr_2, aggExpr}(S_2)$，其中$S_1$和$S_2$是两条流，FOLD构造器用于在流中迭代选择事件。其中$predExpr_1$用于选择迭代的事件，$predExpr_2$定义了迭代条件，$aggExpr$定义了迭代过程中的aggregation操作。FOLD构造器同样使用$\$1$和$\$2$来区分两条流，并使用$\$$来表示最后一次迭代的$S_2$中的事件。在FOLD构造器中，$S_1$的模式必须是$S_2$的模式的一个超集。下面这个例子描述了一个公司的股票在一次交易量Volume大于10000后价格持续上升至少10次的事件:<br>
+$$
+\begin{align}
+& SELECT\ * \\
+& FROM\ FILTER\{cnt > 10\}(\\
+& \quad (SELECT *,\ 1\ as\ cnt \\
+& \quad FROM\ FILTER\{Volumn \gt 10000\}(Stock)) \\
+& \quad \quad FOLD\{$_2.Name=$.Name, $_2.Price \gt $.Price, $.cnt + 1\ AS\ cnt\}(Stock))
+\end{align}
+$$
+</p>
+<h3 id="自动机模型"><a href="#自动机模型" class="headerlink" title="自动机模型"></a>自动机模型</h3><p>Cayuga也是使用自动机模型来进行匹配，下面以一个例子介绍其自动机模型。<br>
+$$
+\begin{align}
+& SELECT\ Name \\
+& FROM\ (SELECT\ Name\ as\ N\ FROM\ Stock)\ Next\{$1.N=$2.Name\}(Stock)
+\end{align}
+$$
+<br>其对应的自动机模型如图所示<br><img src="/images/cayuga_nfa.png" alt="Cayuga自动机模型" style="width:75%"><br>图中的$Q_0、Q_1、Q_2$表示自动机中的状态。它们分别被赋予了固定的关联模式以及对应的输入流。具体而言，$Q_0$被赋予了输入流Stock以及其关联模式。$Q_1$被赋予了关联模式N和输入流Stock。$Q_2$被赋予了关联模式Name，输入流是最终生成的流。每个状态的出边都具有$&lt;\theta, f&gt;$的形式，其中$\theta$表示对于输入流和该状态的关联模式的断言， 而$f$定义了从从该状态的输入以及关联模式到下一个状态的关联模式的映射。从图中可以看到，在Cayuga的自动机模型中，存在两种边，一种是从一个状态指向另一个状态的边，一种是指向自身状态的边。对于指向自身的边，只会在存在二元构造器时出现，如果这条边的断言是来自于过滤的断言(NEXT中的predExpr，FOLD中的$predExpr_1$)， 那么这种边被称为<em>过滤边(filter edges)</em>，对应的断言被称为<em>过滤断言(filter predicates)</em>。如果其断言来自于属性rebind的断言(FOLD中的$predExpr_2$)，则被称为<em>rebind edge</em>，对应的断言被称为<em>rebind predicates</em>。所有其它的边都被称为<em>前向边(forward edges)</em>。每一个中间状态，如果只存在过滤边，则构成NEXT构造器，如果既存在过滤边，也存在rebind edge，那么构成FOLD构造器。</p>
+<h3 id="基于自动机的匹配"><a href="#基于自动机的匹配" class="headerlink" title="基于自动机的匹配"></a>基于自动机的匹配</h3><p>Cayuga的匹配流程如下：</p>
+<p>对一个状态而言，对每一个输入事件，按如下顺序匹配：</p>
+<ol>
+<li>匹配filter edge，若为NEXT构造器，更新对应的数据item</li>
+<li>匹配rebind edge，若为FOLD构造器，更新对应的数据item</li>
+<li>匹配forward edge，在该edge的出状态下生成新的数据item</li>
+</ol>
+<p>对每一个状态，接收其输入流中的事件并进行匹配，最终持续生成匹配结果流，存储在终止状态中。</p>
+<h3 id="与SASE的对比"><a href="#与SASE的对比" class="headerlink" title="与SASE的对比"></a>与SASE的对比</h3><ul>
+<li>在语言层面，SASE语言更为简洁明了</li>
+<li>在操作支持方面，都支持SEQ匹配以及否语义，但Cayuga额外可以有限度地支持未知长度的序列即Kleene语义</li>
+<li>SASE针对事件序列的匹配，而Cayuga更倾向于匹配过程中的Aggregation。</li>
+<li>Cayuga可以支持复杂事件多层次的匹配，而SASE需要级联来完成。</li>
+<li>Cayuga在系统实现上可以有限度地支持乱序</li>
+</ul>
+</div></article></div></main><footer><div class="paginator"><a href="/2019/05/07/CEP-sase/" class="prev">上一篇</a><a href="/2019/05/05/CEP-beginning/" class="next">下一篇</a></div><div class="copyright"><p>© 2019 <a href="http://yoursite.com">梅辉燿</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script></body></html>

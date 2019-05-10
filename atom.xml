@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://yoursite.com/"/>
-  <updated>2019-04-28T13:10:51.963Z</updated>
+  <updated>2019-05-10T02:49:38.065Z</updated>
   <id>http://yoursite.com/</id>
   
   <author>
@@ -17,13 +17,126 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>CEP系统 - SASE+</title>
+    <link href="http://yoursite.com/2019/05/10/CEP-SASE-plus/"/>
+    <id>http://yoursite.com/2019/05/10/CEP-SASE-plus/</id>
+    <published>2019-05-10T02:23:20.000Z</published>
+    <updated>2019-05-10T02:49:38.065Z</updated>
+    
+    <content type="html"><![CDATA[<p>SASE+是SASE的延续，主要为SASE添加了对Kleene模式的支持，并且对Kleene语义，提出了三种匹配策略，均延用至今。本文参考文献：</p><p>[1]. Diao, Yanlei, Neil Immerman, and Daniel Gyllstrom. “Sase+: An agile language for kleene closure over event streams.” <em>UMass Technical Report</em> (2007).</p><p>[2]. Agrawal, Jagrati, et al. “Efficient pattern matching over event streams.” <em>Proceedings of the 2008 ACM SIGMOD international conference on Management of data</em>. ACM, 2008.</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;SASE+是SASE的延续，主要为SASE添加了对Kleene模式的支持，并且对Kleene语义，提出了三种匹配策略，均延用至今。本文参考文献：&lt;/p&gt;
+&lt;p&gt;[1]. Diao, Yanlei, Neil Immerman, and Daniel Gyllstrom. “
+      
+    
+    </summary>
+    
+      <category term="CEP" scheme="http://yoursite.com/categories/CEP/"/>
+    
+    
+      <category term="CEP" scheme="http://yoursite.com/tags/CEP/"/>
+    
+      <category term="SASE" scheme="http://yoursite.com/tags/SASE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>CEP系统 - SASE</title>
+    <link href="http://yoursite.com/2019/05/07/CEP-sase/"/>
+    <id>http://yoursite.com/2019/05/07/CEP-sase/</id>
+    <published>2019-05-07T02:14:00.000Z</published>
+    <updated>2019-05-08T04:03:27.208Z</updated>
+    
+    <content type="html"><![CDATA[<p>SASE系列的第一篇，提出了SASE语言以及NFA模型。</p><h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>传感器(RFID等)的大量部署催生了一大批跟踪监控的应用，如供应链管理、超市盗窃监控、医疗和环境监控等等。同时，大量部署的传感器会实时产生大量的事件需要进行过滤、复杂模式检测以及复杂事件生成等操作。</p><p>为了便于说明，这里举一个超市盗窃的例子，即顾客从货架上取到货物并且未结账。为了识别这个复杂事件，要求系统支持:</p><ul><li>事件的存在和不存在(即否语义)的检测。</li><li>时间约束例如时序、滑动窗口等</li><li>属性约束</li></ul><p>而现有的系统如sub/pub系统主要致力于单个事件的过滤。流处理系统无法处理否语义。现有的复杂事件识别无法处理滑动窗口以及属性约束等等。因此，提出了SASE语言，并设计CEP系统，主要设计目标是：</p><ul><li>大规模流数据支持: 能处理每秒上千的事件</li><li>能够持续地从大的时间窗口中提取复杂事件</li></ul><h3 id="SASE语言"><a href="#SASE语言" class="headerlink" title="SASE语言"></a>SASE语言</h3><p>首先是<b>事件模型</b>：系统的输入是一个无限的事件序列，称为事件流。其中，每个事件都会在某个时间点瞬时且原子性地发生(即发生或不发生)，每个事件都有一个事件类型以及对应的一系列属性，且每个事件都被赋予一个时间戳。</p><p>然后是<b>模式语言</b>。SASE语言都具有如下形式：</p><script type="text/x-mathjax-config">MathJax.Hub.Config({  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script><script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>$$\begin{align}& EVENT &lt;Event\ Pattern&gt; \\& [WHERE &lt;qualification&gt;] \\& [WITHIN &lt;Window&gt;]\end{align}$$<p>下面介绍一下它的操作符：</p><ul><li><strong>ANY</strong>：eg  $Any(A_1, A_2, … ,A_n) $，其中 $A_1、A_2、…、A_n$表示事件类型，该操作符识别其中任何一种类型的事件发生。</li><li><strong>SEQ_</strong>: eg $SEQ(A_1, A_2, …, A_n) $，在不存在negation语义的情况下，<strong>SEQ</strong>被转化为<strong>SEQ_</strong>操作符，<strong>SEQ_</strong>接收一系列事件类型，这些事件类型的先后顺序决定识别的对应事件发生的顺序。即<strong>SEQ_</strong>操作符识别一系列先后发生的事件序列。另外，<strong>SEQ_</strong>操作符可以以<strong>ANY</strong>操作符作为输入</li><li><strong>SEQ_WITHOUT</strong>: eg $SEQ(A_1, A_2, …, A_{i-1},  !A_i, A_{i+1}, …, A_n)$，在存在negation语义的情况下，<strong>SEQ</strong>被转化为<strong>SEQ_WITHOUT</strong>操作符，表示在先后发生的$A_1、A_2、…、A_{i-1}$以及$ A_{i+1}, …, A_n$类型事件之间，不发生$A_i$类型的事件。<strong>SEQ_WITHOUT</strong>操作符存在两种特例，一是如$SEQ(!A_1, A_2)$的以否开始的序列，一种是如$SEQ(A_1, !A_2)$的以否结束的序列，这两种序列只能和<strong>WITHIN</strong>语句结合起来使用。</li><li><strong>Selection</strong>：作用与<strong>WHERE</strong>语句的操作符，是一系列由<strong>$\land$(与)</strong>和<strong>$\lor$(或)</strong>连接起来的简单的参数化的<strong>predicates</strong>。用于筛选事件。</li><li><strong>WITHIN_</strong>：由<strong>WITHIN</strong>语句翻译而来，定义了<strong>SEQ</strong>语句中事件序列的最大时间跨度。</li></ul><h3 id="几点限制"><a href="#几点限制" class="headerlink" title="几点限制"></a>几点限制</h3><ul><li>只支持原始类型的事件到复杂类型的事件之间的转化，不支持复杂类型事件到复杂类型事件之间的转化</li><li>不能处理乱序</li><li>对Aggregation支持有限</li></ul><h3 id="基本识别模型"><a href="#基本识别模型" class="headerlink" title="基本识别模型"></a>基本识别模型</h3><p>以Query：</p>$$\begin{align}& EVENT\  SEQ(A\ x_1,B\ x_2,!C\ x_3 ,D\ x_4) \\& WHERE\  [attr1, attr2] \land x1.attr3 = ‘1’ \land x1.attr4 < x4.attr4 \\& WITHIN\  T\end{align}$$<p>为例，SASE的基本识别模型如图所示<br><img src="/images/sase_basic_query_plan_model.jpg" alt="基本识别模型" style="width:75%"></p><p>共分为五个部分：</p><ul><li><p><strong>Sequence scan and construction(SSC)</strong>： 序列扫描和构造，SSC处理query中的存在(positive)语义组成的序列，得到子序列(例中SEQ(A, B, D))，然后扫描输入流并得到序列。这个过程是基于NFA来实现的。对应子序列SEQ(A, B, D)，其NFA模型如下图所示。其中0、1、2、3表示状态，0为起始状态，3为终止状态。状态之间的边表示状态迁移的条件。我们可以注意到其中每个状态还存在指向自身的*边，这条边可以和向前边同时执行，以跳过不匹配的事件以及在事件匹配时保留当前序列的状态。同时，使用一个执行栈来记录运行过程中活跃的状态，状态变化在栈中使用前向指针来表示。最终使用DFS算法从每个终止状态出发遍历所有到达起始状态的且不存在相邻的相同状态的路径即可得到匹配序列。</p><p><img src="/images/sase_basic_nfa.jpg" alt="nfa模型及执行栈" style="width:75%"></p></li><li><p><strong>Selection($\sigma$)</strong>：根据<strong>WHERE</strong>语句条件对SSC提交的序列进行过滤</p></li><li><p><strong>Window(WD)</strong>：根据<strong>WITHIN</strong>语句定义的窗口来过滤序列</p></li><li><p><strong>Negation(NG)</strong>：处理<strong>negation</strong>语义，过滤序列。这里使用了一种叫<em>partitioned indexing</em>的技术，具体而言，就是将事件流按照固定的时间片段划分。</p></li><li><p><strong>Transformation(TF)</strong>：将最终得到的序列转化为复杂事件</p></li></ul><p>这五个组件按照pipeline的方式组织起来，来快速得到匹配序列。</p><h3 id="优化"><a href="#优化" class="headerlink" title="优化"></a>优化</h3><p>上面提出了SASE的基本执行模型，但是这个模型存在一个问题：在大窗口的情况下，产生的中间结果过大导致系统负载过高，影响query性能。因此提出了几点优化</p><h4 id="SSC优化"><a href="#SSC优化" class="headerlink" title="SSC优化"></a>SSC优化</h4><p>在原有SSC模型的基础上，提出了<strong>Active Instance Stack (AIS)</strong>来代替基础模型中的执行栈，每个NFA的状态都存在一个AIS，在SS过程中，AIS存储每一个使状态变迁到其对应状态的事件以及前置栈中的最近事件(<em>most recent instance in the previous stack</em>, RIP)。如图所示，在状态2对应的AIS中，存储了两个使状态变迁到状态2的事件即$b_3$和$b_6$，其中在状态1的AIS中发生在$b_6$之前的最近事件是$a_4$，因此$a_4$即是对应$b_6$的RIP。图中用两条虚拟边显示了$b_6$的前置事件。在SC阶段，通过一个BFS算法从终止状态的AIS栈回溯到起始状态，即可得到所有的序列。</p><p><img src="/images/sase_optimize_ssc.jpg" alt="SSC优化" style="width:75%"></p><h4 id="Selection优化"><a href="#Selection优化" class="headerlink" title="Selection优化"></a>Selection优化</h4><p>前面的优化只是优化了SSC的效率，并未减少无效的中间结果。在Selection优化的阶段，通过将简单的predicates提前到SSC阶段执行来对SSC执行进行剪枝。</p><p><strong>单属性相等</strong>：即在SEQ中的每个事件类型都存在的一个相同属性的属性值保持不变，eg 相同的RFID标签、相同的病人编号等等。对于这种predicate，最简单的方法是按照该属性将事件流划分为很多不同的小流，但是这种方法对不相关的事件也会进行partition，存在浪费。因此提出了<strong><em>Partitioned Active Instance Stack</em></strong> (<strong><em>PAIS</em></strong>): 在SC过程中来进行划分并产生对应的一系列AIS。这样事件划分即被推迟到query之后，避免了性能损失。<br><img src="/images/sase_optimize_sel_pais.jpg" alt="PAIS" style=";width:75%"></p><p><strong>多属性相等</strong>：类似于单属性相等，但是有多个属性。简单的方法是对每个属性元组都进行划分。但是当划分过多时容易造成内存瓶颈。因此这里提出了两个优化方案：</p><ul><li>Multi-PAIS：对每个属性都应用PAIS，然后取所有PAIS的结果的交集。</li><li>Dynamic Filtering: 只对单属性应用PAIS，对其它属性，在SC阶段进行过滤。</li></ul><p><img src="/images/sase_optimize_sel_multi_pais.jpg" alt="multi-PAIS" style="width:75%"></p><h4 id="Window优化"><a href="#Window优化" class="headerlink" title="Window优化"></a>Window优化</h4><p>与predicate类似，将Window判断提前到SSC过程中。</p><p><img src="/images/sase_optimize_query_plan_model.jpg" alt="优化识别模型" style="width:75%"></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;SASE系列的第一篇，提出了SASE语言以及NFA模型。&lt;/p&gt;
+&lt;h3 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h3&gt;&lt;p&gt;传感器(RFID等)的大量部署催生了一大批跟踪监控的应用，如供应链管
+      
+    
+    </summary>
+    
+      <category term="CEP" scheme="http://yoursite.com/categories/CEP/"/>
+    
+    
+      <category term="CEP" scheme="http://yoursite.com/tags/CEP/"/>
+    
+      <category term="SASE" scheme="http://yoursite.com/tags/SASE/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>CEP系统 — Cayuga</title>
+    <link href="http://yoursite.com/2019/05/07/CEP-cayuga/"/>
+    <id>http://yoursite.com/2019/05/07/CEP-cayuga/</id>
+    <published>2019-05-07T02:05:12.000Z</published>
+    <updated>2019-05-10T02:22:31.451Z</updated>
+    
+    <content type="html"><![CDATA[<p>Cayuga是CEP系列早期的一个有影响力的系统，来源于pub/sub系统。它主要为了解决两个问题：</p><ul><li>支持复杂的query，例如否语义。</li><li>并发query。</li></ul><p>Cayuga设计了自己的query语言<strong>Cayuga Event Language(CEL)</strong>，以支持优化。同样使用了自动机模型。下面分三个部分介绍Cayuga：CEL、自动机模型以及系统架构。</p><h3 id="CEL语言"><a href="#CEL语言" class="headerlink" title="CEL语言"></a>CEL语言</h3><p>首先是数据模型，Cayuga中数据模型参照了数据库模型。</p><p><strong>Event</strong>：在Cayuga中，事件被认为是一个关联元组(relational tuple)，且包含一个起始时间$t_0$和结束时间$t_1$。</p><p><strong>Event Stream</strong>:  和数据库不同，在CEP中，事件流是一个按时间顺序排列的事件序列，每个事件流都包含一个固定的关联模式(relational schema)。事件在事件流中按结束时间$t_1$排列，这个时间也称为<strong>检测时间(detection time)</strong>。检测时间相同的事件被认为同时发生。</p><p>然后是CEL语言，这里以股票应用为例。首先定义了一个股票事件模型：$Stock(Name, Price, Volume)$。 每个CEL Query都具有以下形式：<br><script type="text/x-mathjax-config">MathJax.Hub.Config({  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});</script><script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML"></script>$$\begin{align}& SELECT\ &lt;attributes&gt; \\& FROM\ &lt;stream expression&gt; \\& PUBLISH\ &lt;output stream&gt;\end{align}$$</p><p>这里的SELECT语句和SQL中的SELECT非常类似，都指定的输出模式中的属性名或聚合操作，并可以使用<strong>AS</strong>关键字来重命名。SELECT语句可以省略，若省略则相当于SELECT *。PUBLISH语句指定的输出流的名字，以便其它QUERY可以它为输入。最简单的QUERY如：<br>$$\begin{align}& SELECT\ * \\& FROM\ Stock \\& PUBLISH\ MyStock\end{align}$$<br>FROM语句定义了流表达式，这是整个Query的核心。一个流表达式表明了数据的来源，并且支持了一元构造器FILTER和二元构造器NEXT和FOLD，并且支持在FROM语句中嵌套其它QUERY。下面分别介绍这些构造器。</p><p><strong>FILTER</strong>: 顾名思义，$FILTER{ predExpr }(stream)$是对输入流进行过滤的构造器。下面的例子定义了一个简单的Query从股票流中过滤出IBM的价格大于83的数据形成新的流。另外，在FILTER构造器中事件有一个特殊的属性DUR，实际上DUR指的是事件发生的时间间隔$t_1-t_0$。<br>$$\begin{align}& SELECT\ Price\ AS\ IBMPrice \\& FROM\ FILTER\{name='IBM'\ and\ Price > 83\}(stock) \\& PUBLISH\ IBMStock\end{align}$$<br><strong>NEXT</strong>: $S_1\ NEXT{predExpr}(S_2)$，其中$S_1$和$S_2$是两条流。NEXT构造器输入一个事件对($e_1, e_2$)的流，其中$e_1$来自流$S_1$，$e_2$是$e_1$发生后$S_2$中发生的下一个满足predExpr的事件。下面是一个例子，用来提取价格大于83的IBM股票价格以及之后的Microsoft股票的价格:<br>$$\begin{align}& SELECT\ IBMPrice,\ Price\ AS\ MSFTPrice \\& FROM\ IBMStock\ NEXT\{Name='MSFT'\}(Stock) \end{align}$$<br>另外，当NEXT的两个输入流中含有相同的属性时，为了避免冲突，使用$\$1.foo$表示左流的属性，$\$2.foo$表示右流的属性。</p><p><strong>FOLD</strong>: $S_1\ FOLD{predExpr_1, predExpr_2, aggExpr}(S_2)$，其中$S_1$和$S_2$是两条流，FOLD构造器用于在流中迭代选择事件。其中$predExpr_1$用于选择迭代的事件，$predExpr_2$定义了迭代条件，$aggExpr$定义了迭代过程中的aggregation操作。FOLD构造器同样使用$\$1$和$\$2$来区分两条流，并使用$\$$来表示最后一次迭代的$S_2$中的事件。在FOLD构造器中，$S_1$的模式必须是$S_2$的模式的一个超集。下面这个例子描述了一个公司的股票在一次交易量Volume大于10000后价格持续上升至少10次的事件:<br>$$\begin{align}& SELECT\ * \\& FROM\ FILTER\{cnt > 10\}(\\& \quad (SELECT *,\ 1\ as\ cnt \\& \quad FROM\ FILTER\{Volumn \gt 10000\}(Stock)) \\& \quad \quad FOLD\{$_2.Name=$.Name, $_2.Price \gt $.Price, $.cnt + 1\ AS\ cnt\}(Stock))\end{align}$$</p><h3 id="自动机模型"><a href="#自动机模型" class="headerlink" title="自动机模型"></a>自动机模型</h3><p>Cayuga也是使用自动机模型来进行匹配，下面以一个例子介绍其自动机模型。<br>$$\begin{align}& SELECT\ Name \\& FROM\ (SELECT\ Name\ as\ N\ FROM\ Stock)\ Next\{$1.N=$2.Name\}(Stock)\end{align}$$<br>其对应的自动机模型如图所示<br><img src="/images/cayuga_nfa.png" alt="Cayuga自动机模型" style="width:75%"><br>图中的$Q_0、Q_1、Q_2$表示自动机中的状态。它们分别被赋予了固定的关联模式以及对应的输入流。具体而言，$Q_0$被赋予了输入流Stock以及其关联模式。$Q_1$被赋予了关联模式N和输入流Stock。$Q_2$被赋予了关联模式Name，输入流是最终生成的流。每个状态的出边都具有$&lt;\theta, f&gt;$的形式，其中$\theta$表示对于输入流和该状态的关联模式的断言， 而$f$定义了从从该状态的输入以及关联模式到下一个状态的关联模式的映射。从图中可以看到，在Cayuga的自动机模型中，存在两种边，一种是从一个状态指向另一个状态的边，一种是指向自身状态的边。对于指向自身的边，只会在存在二元构造器时出现，如果这条边的断言是来自于过滤的断言(NEXT中的predExpr，FOLD中的$predExpr_1$)， 那么这种边被称为<em>过滤边(filter edges)</em>，对应的断言被称为<em>过滤断言(filter predicates)</em>。如果其断言来自于属性rebind的断言(FOLD中的$predExpr_2$)，则被称为<em>rebind edge</em>，对应的断言被称为<em>rebind predicates</em>。所有其它的边都被称为<em>前向边(forward edges)</em>。每一个中间状态，如果只存在过滤边，则构成NEXT构造器，如果既存在过滤边，也存在rebind edge，那么构成FOLD构造器。</p><h3 id="基于自动机的匹配"><a href="#基于自动机的匹配" class="headerlink" title="基于自动机的匹配"></a>基于自动机的匹配</h3><p>Cayuga的匹配流程如下：</p><p>对一个状态而言，对每一个输入事件，按如下顺序匹配：</p><ol><li>匹配filter edge，若为NEXT构造器，更新对应的数据item</li><li>匹配rebind edge，若为FOLD构造器，更新对应的数据item</li><li>匹配forward edge，在该edge的出状态下生成新的数据item</li></ol><p>对每一个状态，接收其输入流中的事件并进行匹配，最终持续生成匹配结果流，存储在终止状态中。</p><h3 id="与SASE的对比"><a href="#与SASE的对比" class="headerlink" title="与SASE的对比"></a>与SASE的对比</h3><ul><li>在语言层面，SASE语言更为简洁明了</li><li>在操作支持方面，都支持SEQ匹配以及否语义，但Cayuga额外可以有限度地支持未知长度的序列即Kleene语义</li><li>SASE针对事件序列的匹配，而Cayuga更倾向于匹配过程中的Aggregation。</li><li>Cayuga可以支持复杂事件多层次的匹配，而SASE需要级联来完成。</li><li>Cayuga在系统实现上可以有限度地支持乱序</li></ul>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;Cayuga是CEP系列早期的一个有影响力的系统，来源于pub/sub系统。它主要为了解决两个问题：&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;支持复杂的query，例如否语义。&lt;/li&gt;
+&lt;li&gt;并发query。&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Cayuga设计了自己的query语言&lt;str
+      
+    
+    </summary>
+    
+      <category term="CEP" scheme="http://yoursite.com/categories/CEP/"/>
+    
+    
+      <category term="CEP" scheme="http://yoursite.com/tags/CEP/"/>
+    
+      <category term="Cayuga" scheme="http://yoursite.com/tags/Cayuga/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>CEP-起源(一)</title>
+    <link href="http://yoursite.com/2019/05/05/CEP-beginning/"/>
+    <id>http://yoursite.com/2019/05/05/CEP-beginning/</id>
+    <published>2019-05-05T02:22:15.000Z</published>
+    <updated>2019-05-07T02:04:44.633Z</updated>
+    
+    <content type="html"><![CDATA[<p>CEP的起源来自于斯坦福大学David C.Luckham教授领导的Program Analysis and Verification Group(PAVG)研究小组。1995年，该小组在IEEETransactions on Software Engineering上发表了一篇文章，推出了RAPIDE<sup>[<a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=385971" title="Specification and Analysis of System  Architecture  Using  Rapide" target="_blank" rel="noopener">1</a>]</sup>。RAPIDE是一种事件驱动的针对分布式系统原型设计的语言，它提供以下能力：</p><ul><li>解释系统各个组件模型</li><li>提供一个执行模型并能记录执行过程中的各种行为</li><li>定义事件之间的关联以及约束以及映射</li></ul><p>1998年，该小组提出了Event Processing Network(EPN)的概念并详细解释了CEP<sup>[<a href="https://www.unix.com/pdf/CEP_in_distributed_systems.pdf" title="Complex Event Processing in Distributed Systems" target="_blank" rel="noopener">2</a>]</sup>等介绍了CEP在分布式系统中的应用。</p><p>后两年，同校的Louis Perrochon教授和该小组合作将CEP的应用推广至商业管理、pub/sub系统等方面并设计出EPN的模型<sup>[<a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.35.7689&amp;rep=rep1&amp;type=pdf" title="Real Time Event Based Analysis of Complex Systems" target="_blank" rel="noopener">3</a>][<a href="http://infolab.stanford.edu/pub/cstr/reports/csl/tr/99/788/CSL-TR-99-788.pdf" title="Managing Event Processing Networks" target="_blank" rel="noopener">4</a>]</sup>。</p><p>下面我会详细介绍一下EPN的概念以及CEP的提出。</p><p>分布式系统一般都有一个交流层，用于系统中不同组件之间的消息传输，它位于系统的底层，是分布式系统的基础。然而交流层很容易出现错误，每次出现错误，都可能造成整个系统的停摆。因此，大部分分布式系统都会内置诊断措施来解决网络问题，他们使用交流层来记录日志数据(或者成为事件/event)，系统管理员可以分析网络日志来发现问题并采取措施，有很多工具可以辅助这一过程。然而这种方式仍然停留在原始的、低级的层面。存在很多问题：</p><ul><li><p>日志中记录的事件是很低层次的数据</p></li><li><p>数据量非常大</p></li><li><p>相关的事件掺杂在大量不同其它事件中，且可能分布在不同的时间片。</p></li><li><p>日志数据缺乏因果关系。</p></li></ul><p>因此，现有的方式很难很好地对交流层日志进行分析得出有效的结果。</p><p>另一方面，如果需要分析日志得到应用层面的信息会更加复杂。现今的低层级日志数据很难在解决应用层面问题上起到作用。而要达到这个目的，需要将高层级操作与低层级的数据交流日志联系起来，这种技术暂时还无法实现。</p><p>最后，当前的系统只给内置操作加入日志监测，而更高层级如应用层等没有日志。并且缺乏对不同类型事件的分析。</p><p>因此，作者提出了一种新的系统监测和分析工具，这种工具的最基础就是聚合低层级的事件转化为高层级的事件，并且它具有以下能力：</p><ul><li>能轻易地将有效事件从大量事件日志中过滤出来。</li><li>将低层级事件聚合为高层级事件来表示其更复杂的意义</li><li>在不同时间段内根据因果关系将发生的事件检测出来</li><li>监测事件日志，并按照严格的模式自动监测违规事件</li></ul><p>作者将这种技术称为RAPIDE Complex Event Processing。并为此对事件做了抽象，作者认为事件可以分层，底层的事件是确切的事件，表示了一个确定的操作。高层的事件是虚拟的事件，它们是底层事件的集合。并且为了确切地分级，需要指定不同层级事件之间的映射关系。因此这里引入了一个概念: <b>poset</b>(partially ordered set of events，这里翻译为有序部分事件集合)，一个poset包含一系列的事件集合以及它们之间的关系。并且定义了两种操作:</p><ul><li><b>filters(过滤)</b>: 接受posets作为输入并输出输入的一部分。通过事件模式(event patterns)来定义。主要是为了过滤无效事件</li><li><b>maps(映射)</b>: 接受posets作为输入并产生新的事件。被定义为输入和输出事件模式对。任何满足输入模式的事件集合将会根据对应的输出模式产生新的事件。Maps也被称为<b>aggregator(聚合器)</b>。目的是构造高层级事件。</li></ul><p>通过这些操作，管理员可以轻易地观测不同事件层级发生的事件来对系统进行监测，来对系统错误进行快速反应。</p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;p&gt;CEP的起源来自于斯坦福大学David C.Luckham教授领导的Program Analysis and Verification Group(PAVG)研究小组。1995年，该小组在IEEETransactions on Software Engineering上发表
+      
+    
+    </summary>
+    
+      <category term="CEP" scheme="http://yoursite.com/categories/CEP/"/>
+    
+    
+      <category term="CEP" scheme="http://yoursite.com/tags/CEP/"/>
+    
+  </entry>
+  
+  <entry>
     <title>CEP系列调研 — 目录</title>
     <link href="http://yoursite.com/2019/04/28/cep-survey-catalogue/"/>
     <id>http://yoursite.com/2019/04/28/cep-survey-catalogue/</id>
     <published>2019-04-28T01:14:03.000Z</published>
-    <updated>2019-04-28T13:10:51.963Z</updated>
+    <updated>2019-05-08T08:08:53.338Z</updated>
     
-    <content type="html"><![CDATA[<h3 id="Complex-Event-Processing"><a href="#Complex-Event-Processing" class="headerlink" title="Complex Event Processing"></a>Complex Event Processing</h3><p>CEP(Complex Event Processing)是一种根据给定pattern从数据流中识别特定的数据序列的一类技术。本系列文章旨在调研CEP的发展历程，并对最新的CEP系列技术做详细的了解。</p><p>从功能上讲，可以将CEP分为CER(Complex Event Processing)以及Aggregation两个方面。其中，CER主要用于对特定序列的识别，Aggregation主要致力于提取识别序列的统计信息。在早期的系统中，Aggregation往往是基于CER的，但在最新的一些文章中，提出了一些不基于识别的online系统。</p><p>从系统上分，CEP早期主要是单机非并行来处理。而随着大数据时代的到来，数据流逐渐向大规模高速的方向演化，产生了DCEP分支。CEP向分布式处理发展。</p><p>另外，在某些领域，存在着对单个数据流同时进行多个Query的情况。因此，产生了模式share的一些研究来共享多Query识别的资源。</p><h3 id="文章列表"><a href="#文章列表" class="headerlink" title="文章列表"></a>文章列表</h3><p>下面是系列CEP文章目录，以下文章不完全按时间倒序排布：</p><ul><li><p>Complete Event Trend Detection in High-Rate Event Streams<sup>[<a href="https://dl.acm.org/citation.cfm?id=3035947" target="_blank" rel="noopener">1</a>]</sup></p><p>CET(Complete Event Trend)识别主要针对包含单个kleene模式的Query识别进行优化，采用了图模型的方式共享中间序列(partial sequence)存储，降低了存储冗余。同时，采用hybrid的识别方式从图中提取最终结果。</p></li><li><p>On complexity and optimization of expensive queries in complex event processing<sup>[<a href="https://dl.acm.org/citation.cfm?id=2593671" target="_blank" rel="noopener">2</a>]</sup></p><p>  本文是<a href="http://avid.cs.umass.edu/sase/index.php" target="_blank" rel="noopener">SASE系列</a>的一个升级版，针对复杂Query进行分析找出低效的操作并将这个操作延后进行来提高系统的处理能力。</p></li><li><p>SASE+</p><ul><li>Efficient pattern matching over event streams<sup>[<a href="https://dl.acm.org/citation.cfm?doid=1376616.1376634" target="_blank" rel="noopener">3</a>]</sup></li><li>SASE+: An Agile Language for Kleene Closure overEvent Streams<sup>[<a href="http://avid.cs.umass.edu/sase/uploads/pubs/07-03.pdf" target="_blank" rel="noopener">4</a>]</sup></li></ul><p>SASE+，提出了对Kleene模式的支持，提出了kleene匹配的改进NFA模型。这两篇文章一个是详细介绍了改进的NFA匹配模型。一个详细介绍了SASE+语言，特别是针对Kleene的匹配。</p></li><li><p>High-performance complex event processing over streams<sup>[<a href="https://dl.acm.org/citation.cfm?doid=1142473.1142520" target="_blank" rel="noopener">5</a>]</sup></p><p>SASE，提出了SASE语言来进行CEP，提出了NFA模型。</p></li><li><p>TelegraphCQ: Continuous Dataflow Processing for an Uncertain World<sup>[<a href="http://www-db.cs.wisc.edu/cidr/cidr2003/program/p24.pdf" target="_blank" rel="noopener">6</a>]</sup></p><p>加州大学伯克利分校推出的一个系统，主要解决的问题是:</p><ul><li>在数据流中做query而不是数据库</li><li>持续query: window,slide</li><li>query之间的share以提高系统效率</li></ul></li><li><p>Efficient Filtering of Composite Events<sup>[<a href="https://link.springer.com/chapter/10.1007%2F3-540-45073-4_17" target="_blank" rel="noopener">7</a>]</sup></p><p>  在ENS(Event Notification Services)系统中，识别与(同时发生)、或(至少一个发生)、非(一段时间不发生)以及简单序列</p></li><li><p>Temporal Management of RFID Data<sup>[<a href="http://www.vldb.org/archives/website/2005/program/paper/wed/p1128-wang.pdf" target="_blank" rel="noopener">8</a>]</sup></p><p>  一个RFID中间件，主要是基于关系型数据库来做的，将query转化为对应的数据库操作。</p></li><li><p>Real Time Event Based Analysis of Complex Systems<sup>[<a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.35.7689&amp;rep=rep1&amp;type=pdf" target="_blank" rel="noopener">9</a>]</sup></p></li><li><p>Complex Event Processing in Distributed Systems<sup>[<a href="https://www.unix.com/pdf/CEP_in_distributed_systems.pdf" target="_blank" rel="noopener">10</a>]</sup></p></li><li><p>Managing Event Processing Networks<sup>[<a href="http://infolab.stanford.edu/pub/cstr/reports/csl/tr/99/788/CSL-TR-99-788.pdf" target="_blank" rel="noopener">11</a>]</sup></p><p>对CEP的概念和应用做了较为详细的说明</p></li></ul><hr><ul><li><p>Cayuga</p><ul><li>Cayuga: A General Purpose Event Monitoring System<sup>[<a href="http://cidrdb.org/cidr2007/papers/cidr07p47.pdf" target="_blank" rel="noopener">12</a>]</sup></li><li>Towards Expressive Publish/Subscribe Systems<sup>[<a href="https://link.springer.com/content/pdf/10.1007%2F11687238_38.pdf" target="_blank" rel="noopener">13</a>]</sup></li></ul><p>这两篇文章介绍了Cayuga，9主要针对Cayuga系统的设计及实现，10介绍了基于Cayuga的Pub/Sub系统</p></li><li><p>ZStream: A Cost-based Query Processor for Adaptively Detecting Composite Events<sup>[<a href="https://dl.acm.org/citation.cfm?doid=1559845.1559867" target="_blank" rel="noopener">14</a>]</sup></p></li><li><p>E-Cube: multi-dimensional event sequence analysis using hierarchical pattern query sharing<sup>[<a href="https://dl.acm.org/citation.cfm?doid=1989323.1989416" target="_blank" rel="noopener">15</a>]</sup></p></li><li><p>Complex event analytics: online aggregation of stream sequence patterns<sup>[<a href="https://dl.acm.org/citation.cfm?doid=2588555.2593684" target="_blank" rel="noopener">16</a>]</sup></p></li><li><p>High-performance complex event processing over XML streams<sup>[<a href="https://dl.acm.org/citation.cfm?doid=2213836.2213866" target="_blank" rel="noopener">17</a>]</sup></p></li></ul><hr><ul><li>Complex Event Recognition in the Big Data Era<sup>[<a href="http://www.vldb.org/pvldb/vol10/p1996-giatrakos.pdf" target="_blank" rel="noopener">18</a>]</sup></li></ul>]]></content>
+    <content type="html"><![CDATA[<h3 id="Complex-Event-Processing"><a href="#Complex-Event-Processing" class="headerlink" title="Complex Event Processing"></a>Complex Event Processing</h3><p>CEP(Complex Event Processing)是一种根据给定pattern从数据流中识别特定的数据序列的一类技术。本系列文章旨在调研CEP的发展历程，并对最新的CEP系列技术做详细的了解。</p><p>从功能上讲，可以将CEP分为CER(Complex Event Processing)以及Aggregation两个方面。其中，CER主要用于对特定序列的识别，Aggregation主要致力于提取识别序列的统计信息。在早期的系统中，Aggregation往往是基于CER的，但在最新的一些文章中，提出了一些不基于识别的online系统。</p><p>从系统上分，CEP早期主要是单机非并行来处理。而随着大数据时代的到来，数据流逐渐向大规模高速的方向演化，产生了DCEP分支。CEP向分布式处理发展。</p><p>另外，在某些领域，存在着对单个数据流同时进行多个Query的情况。因此，产生了模式share的一些研究来共享多Query识别的资源。</p><h3 id="文章列表"><a href="#文章列表" class="headerlink" title="文章列表"></a>文章列表</h3><p>下面是系列CEP文章目录，以下文章不完全按时间倒序排布：</p><ul><li><p>Complete Event Trend Detection in High-Rate Event Streams<sup>[<a href="https://dl.acm.org/citation.cfm?id=3035947" target="_blank" rel="noopener">1</a>]</sup></p><p>CET(Complete Event Trend)识别主要针对包含单个kleene模式的Query识别进行优化，采用了图模型的方式共享中间序列(partial sequence)存储，降低了存储冗余。同时，采用hybrid的识别方式从图中提取最终结果。</p></li><li><p>On complexity and optimization of expensive queries in complex event processing<sup>[<a href="https://dl.acm.org/citation.cfm?id=2593671" target="_blank" rel="noopener">2</a>]</sup></p><p>  本文是<a href="http://avid.cs.umass.edu/sase/index.php" target="_blank" rel="noopener">SASE系列</a>的一个升级版，针对复杂Query进行分析找出低效的操作并将这个操作延后进行来提高系统的处理能力。</p></li><li><p>SASE+</p><ul><li>Efficient pattern matching over event streams<sup>[<a href="https://dl.acm.org/citation.cfm?doid=1376616.1376634" target="_blank" rel="noopener">3</a>]</sup></li><li>SASE+: An Agile Language for Kleene Closure overEvent Streams<sup>[<a href="http://avid.cs.umass.edu/sase/uploads/pubs/07-03.pdf" target="_blank" rel="noopener">4</a>]</sup></li></ul><p>SASE+，提出了对Kleene模式的支持，提出了kleene匹配的改进NFA模型。这两篇文章一个是详细介绍了改进的NFA匹配模型。一个详细介绍了SASE+语言，特别是针对Kleene的匹配。</p></li><li><p>High-performance complex event processing over streams<sup>[<a href="https://dl.acm.org/citation.cfm?doid=1142473.1142520" target="_blank" rel="noopener">5</a>]</sup></p><p>SASE，提出了SASE语言来进行CEP，使用NFA模型进行CEP并进行了若干优化。</p></li><li><p>TelegraphCQ: Continuous Dataflow Processing for an Uncertain World<sup>[<a href="http://www-db.cs.wisc.edu/cidr/cidr2003/program/p24.pdf" target="_blank" rel="noopener">6</a>]</sup></p><p>加州大学伯克利分校推出的一个系统，主要解决的问题是:</p><ul><li>在数据流中做query而不是数据库</li><li>持续query: window,slide</li><li>query之间的share以提高系统效率</li></ul></li><li><p>Efficient Filtering of Composite Events<sup>[<a href="https://link.springer.com/chapter/10.1007%2F3-540-45073-4_17" target="_blank" rel="noopener">7</a>]</sup></p><p>  在ENS(Event Notification Services)系统中，识别与(同时发生)、或(至少一个发生)、非(一段时间不发生)以及简单序列</p></li><li><p>Temporal Management of RFID Data<sup>[<a href="http://www.vldb.org/archives/website/2005/program/paper/wed/p1128-wang.pdf" target="_blank" rel="noopener">8</a>]</sup></p><p>  一个RFID中间件，主要是基于关系型数据库来做的，将query转化为对应的数据库操作。</p></li><li><p>Real Time Event Based Analysis of Complex Systems<sup>[<a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.35.7689&amp;rep=rep1&amp;type=pdf" target="_blank" rel="noopener">9</a>]</sup></p></li><li><p>Complex Event Processing in Distributed Systems<sup>[<a href="https://www.unix.com/pdf/CEP_in_distributed_systems.pdf" target="_blank" rel="noopener">10</a>]</sup></p></li><li><p>Managing Event Processing Networks<sup>[<a href="http://infolab.stanford.edu/pub/cstr/reports/csl/tr/99/788/CSL-TR-99-788.pdf" target="_blank" rel="noopener">11</a>]</sup></p><p>对CEP的概念和应用做了较为详细的说明</p></li></ul><hr><ul><li><p>Cayuga</p><ul><li>Cayuga: A General Purpose Event Monitoring System<sup>[<a href="http://cidrdb.org/cidr2007/papers/cidr07p47.pdf" target="_blank" rel="noopener">12</a>]</sup></li><li>Towards Expressive Publish/Subscribe Systems<sup>[<a href="https://link.springer.com/content/pdf/10.1007%2F11687238_38.pdf" target="_blank" rel="noopener">13</a>]</sup></li></ul><p>这两篇文章介绍了Cayuga，9主要针对Cayuga系统的设计及实现，10介绍了基于Cayuga的Pub/Sub系统</p></li><li><p>ZStream: A Cost-based Query Processor for Adaptively Detecting Composite Events<sup>[<a href="https://dl.acm.org/citation.cfm?doid=1559845.1559867" target="_blank" rel="noopener">14</a>]</sup></p></li><li><p>E-Cube: multi-dimensional event sequence analysis using hierarchical pattern query sharing<sup>[<a href="https://dl.acm.org/citation.cfm?doid=1989323.1989416" target="_blank" rel="noopener">15</a>]</sup></p></li><li><p>Complex event analytics: online aggregation of stream sequence patterns<sup>[<a href="https://dl.acm.org/citation.cfm?doid=2588555.2593684" target="_blank" rel="noopener">16</a>]</sup></p></li><li><p>High-performance complex event processing over XML streams<sup>[<a href="https://dl.acm.org/citation.cfm?doid=2213836.2213866" target="_blank" rel="noopener">17</a>]</sup></p></li></ul><hr><ul><li>Complex Event Recognition in the Big Data Era<sup>[<a href="http://www.vldb.org/pvldb/vol10/p1996-giatrakos.pdf" target="_blank" rel="noopener">18</a>]</sup></li></ul>]]></content>
     
     <summary type="html">
     
@@ -113,22 +226,6 @@
       <category term="Hexo" scheme="http://yoursite.com/tags/Hexo/"/>
     
       <category term="博客" scheme="http://yoursite.com/tags/%E5%8D%9A%E5%AE%A2/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>SASE</title>
-    <link href="http://yoursite.com/2019/04/18/SASE/"/>
-    <id>http://yoursite.com/2019/04/18/SASE/</id>
-    <published>2019-04-18T09:30:27.000Z</published>
-    <updated>2019-04-20T04:31:37.153Z</updated>
-    
-    <summary type="html">
-    
-    </summary>
-    
-    
-      <category term="CEP" scheme="http://yoursite.com/tags/CEP/"/>
     
   </entry>
   

@@ -2,9 +2,37 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://yoursite.com/2019/05/10/CEP-SASE-plus/</loc>
+    
+    <lastmod>2019-05-10T02:49:38.065Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2019/05/07/CEP-cayuga/</loc>
+    
+    <lastmod>2019-05-10T02:22:31.451Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://yoursite.com/2019/04/28/cep-survey-catalogue/</loc>
     
-    <lastmod>2019-04-28T13:10:51.963Z</lastmod>
+    <lastmod>2019-05-08T08:08:53.338Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2019/05/07/CEP-sase/</loc>
+    
+    <lastmod>2019-05-08T04:03:27.208Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://yoursite.com/2019/05/05/CEP-beginning/</loc>
+    
+    <lastmod>2019-05-07T02:04:44.633Z</lastmod>
     
   </url>
   
@@ -33,13 +61,6 @@
     <loc>http://yoursite.com/2019/04/19/jupyter/</loc>
     
     <lastmod>2019-04-23T07:19:56.148Z</lastmod>
-    
-  </url>
-  
-  <url>
-    <loc>http://yoursite.com/2019/04/18/SASE/</loc>
-    
-    <lastmod>2019-04-20T04:31:37.153Z</lastmod>
     
   </url>
   

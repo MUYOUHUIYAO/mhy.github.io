@@ -1,0 +1,37 @@
+<!DOCTYPE html><html lang="zh-cn"><head><meta name="generator" content="Hexo 3.8.0"><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> CEP-起源(一) · 梅辉燿的博客</title><meta name="description" content="CEP-起源(一) - 梅辉燿"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/images/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://yoursite.com/atom.xml" title="梅辉燿的博客"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/images/favicon.png" alt="logo"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">博客</a></li><li class="nav-list-item"><a href="/tags" target="_self" class="nav-list-link">标签</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">档案</a></li><li class="nav-list-item"><a href="/categories" target="_self" class="nav-list-link">分类</a></li><li class="nav-list-item"><a href="https://github.com/MUYOUHUIYAO" target="_blank" class="nav-list-link">GITHUB</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">CEP-起源(一)</h1><div class="post-info">2019年5月5日</div><div class="post-content"><p>CEP的起源来自于斯坦福大学David C.Luckham教授领导的Program Analysis and Verification Group(PAVG)研究小组。1995年，该小组在IEEETransactions on Software Engineering上发表了一篇文章，推出了RAPIDE<sup>[<a href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=385971" title="Specification and Analysis of System  Architecture  Using  Rapide" target="_blank" rel="noopener">1</a>]</sup>。RAPIDE是一种事件驱动的针对分布式系统原型设计的语言，它提供以下能力：</p>
+<ul>
+<li>解释系统各个组件模型</li>
+<li>提供一个执行模型并能记录执行过程中的各种行为</li>
+<li>定义事件之间的关联以及约束以及映射</li>
+</ul>
+<p>1998年，该小组提出了Event Processing Network(EPN)的概念并详细解释了CEP<sup>[<a href="https://www.unix.com/pdf/CEP_in_distributed_systems.pdf" title="Complex Event Processing in Distributed Systems" target="_blank" rel="noopener">2</a>]</sup>等介绍了CEP在分布式系统中的应用。</p>
+<p>后两年，同校的Louis Perrochon教授和该小组合作将CEP的应用推广至商业管理、pub/sub系统等方面并设计出EPN的模型<sup>[<a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.35.7689&amp;rep=rep1&amp;type=pdf" title="Real Time Event Based Analysis of Complex Systems" target="_blank" rel="noopener">3</a>][<a href="http://infolab.stanford.edu/pub/cstr/reports/csl/tr/99/788/CSL-TR-99-788.pdf" title="Managing Event Processing Networks" target="_blank" rel="noopener">4</a>]</sup>。</p>
+<p>下面我会详细介绍一下EPN的概念以及CEP的提出。</p>
+<p>分布式系统一般都有一个交流层，用于系统中不同组件之间的消息传输，它位于系统的底层，是分布式系统的基础。然而交流层很容易出现错误，每次出现错误，都可能造成整个系统的停摆。因此，大部分分布式系统都会内置诊断措施来解决网络问题，他们使用交流层来记录日志数据(或者成为事件/event)，系统管理员可以分析网络日志来发现问题并采取措施，有很多工具可以辅助这一过程。然而这种方式仍然停留在原始的、低级的层面。存在很多问题：</p>
+<ul>
+<li><p>日志中记录的事件是很低层次的数据</p>
+</li>
+<li><p>数据量非常大</p>
+</li>
+<li><p>相关的事件掺杂在大量不同其它事件中，且可能分布在不同的时间片。</p>
+</li>
+<li><p>日志数据缺乏因果关系。</p>
+</li>
+</ul>
+<p>因此，现有的方式很难很好地对交流层日志进行分析得出有效的结果。</p>
+<p>另一方面，如果需要分析日志得到应用层面的信息会更加复杂。现今的低层级日志数据很难在解决应用层面问题上起到作用。而要达到这个目的，需要将高层级操作与低层级的数据交流日志联系起来，这种技术暂时还无法实现。</p>
+<p>最后，当前的系统只给内置操作加入日志监测，而更高层级如应用层等没有日志。并且缺乏对不同类型事件的分析。</p>
+<p>因此，作者提出了一种新的系统监测和分析工具，这种工具的最基础就是聚合低层级的事件转化为高层级的事件，并且它具有以下能力：</p>
+<ul>
+<li>能轻易地将有效事件从大量事件日志中过滤出来。</li>
+<li>将低层级事件聚合为高层级事件来表示其更复杂的意义</li>
+<li>在不同时间段内根据因果关系将发生的事件检测出来</li>
+<li>监测事件日志，并按照严格的模式自动监测违规事件</li>
+</ul>
+<p>作者将这种技术称为RAPIDE Complex Event Processing。并为此对事件做了抽象，作者认为事件可以分层，底层的事件是确切的事件，表示了一个确定的操作。高层的事件是虚拟的事件，它们是底层事件的集合。并且为了确切地分级，需要指定不同层级事件之间的映射关系。因此这里引入了一个概念: <b>poset</b>(partially ordered set of events，这里翻译为有序部分事件集合)，一个poset包含一系列的事件集合以及它们之间的关系。并且定义了两种操作:</p>
+<ul>
+<li><b>filters(过滤)</b>: 接受posets作为输入并输出输入的一部分。通过事件模式(event patterns)来定义。主要是为了过滤无效事件</li>
+<li><b>maps(映射)</b>: 接受posets作为输入并产生新的事件。被定义为输入和输出事件模式对。任何满足输入模式的事件集合将会根据对应的输出模式产生新的事件。Maps也被称为<b>aggregator(聚合器)</b>。目的是构造高层级事件。</li>
+</ul>
+<p>通过这些操作，管理员可以轻易地观测不同事件层级发生的事件来对系统进行监测，来对系统错误进行快速反应。</p>
+</div></article></div></main><footer><div class="paginator"><a href="/2019/05/07/CEP-cayuga/" class="prev">上一篇</a><a href="/2019/04/28/cep-survey-catalogue/" class="next">下一篇</a></div><div class="copyright"><p>© 2019 <a href="http://yoursite.com">梅辉燿</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script></body></html>
